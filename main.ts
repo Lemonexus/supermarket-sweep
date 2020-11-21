@@ -8,6 +8,19 @@ function createSubtotalSprite () {
     subtotalSprite.top = 0
     subtotalSprite.setFlag(SpriteFlag.RelativeToCamera, true)
 }
+sprites.onOverlap(SpriteKind.Grocery, SpriteKind.Grocery, function(sprite: Sprite, otherSprite: Sprite) {
+    tiles.placeOnRandomTile(sprite, myTiles.tile1)
+})
+scene.onOverlapTile(SpriteKind.Player, myTiles.tile10, function (sprite, location) {
+	let display = "SUBTOTAL: $" + subtotal
+
+    let cartItems = sprites.allOfKind(SpriteKind.CartItem)
+    for (let c of cartItems){
+        display += "\n" + sprites.readDataString(c, "name") + ": $" + sprites.readDataNumber(c, "cost")
+    }
+    game.showLongText(display, DialogLayout.Center)
+    game.over(true)
+})
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Grocery, function (p, g) {
     if (controller.A.isPressed()) {
         addToCart(g)
@@ -19,15 +32,15 @@ function addToCart (grocery: Sprite) {
     item.x = player.x
     item.y = player.y
     item.follow(player)
-
-    //update subtotal
+    //update item info
+    sprites.setDataNumber(item, "cost", sprites.readDataNumber(grocery, "cost"))
+    sprites.setDataString(item, "name", sprites.readDataString(grocery, "name"))
+    // update subtotal
     subtotal += sprites.readDataNumber(grocery, "cost")
     subtotalSprite.setText("$" + subtotal)
-
-    //update speed
-    speed -= sprites.readDataNumber(grocery, "weight")
-    
-    if (speed < 5){
+    // update speed
+    speed += 0 - sprites.readDataNumber(grocery, "weight")
+    if (speed < 5) {
         speed = 5
     }
     controller.moveSprite(player, speed, speed)
@@ -44,9 +57,8 @@ function createAllProducts () {
         createProduct(groceryImages[i], groceryCosts[i], groceryWeights[i], groceryNames[i])
     }
 }
-let speed = 100
-let subtotal = 0
 let p: Sprite = null
+let subtotal = 0
 let item: Sprite = null
 let subtotalSprite: TextSprite = null
 let player: Sprite = null
@@ -54,10 +66,12 @@ let groceryCosts: number[] = []
 let groceryWeights: number[] = []
 let groceryNames: string[] = []
 let groceryImages: Image[] = []
-let image2 = null
-let cost = 0
-let weight = 0
+let speed = 0
 let name = ""
+let weight = 0
+let cost = 0
+let image2 = null
+speed = 100
 groceryImages = [
 img`
     . . . 2 2 2 . . . . . . . . . . 
@@ -301,3 +315,4 @@ scene.cameraFollowSprite(player)
 tiles.placeOnTile(player, tiles.getTileLocation(1, 3))
 createAllProducts()
 createSubtotalSprite()
+info.startCountdown(30)
