@@ -19,6 +19,7 @@ scene.onOverlapTile(SpriteKind.Player, myTiles.tile10, function (sprite, locatio
         display += "\n" + sprites.readDataString(c, "name") + ": $" + sprites.readDataNumber(c, "cost")
     }
     game.showLongText(display, DialogLayout.Center)
+    info.setScore(subtotal)
     game.over(true)
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Grocery, function (p, g) {
